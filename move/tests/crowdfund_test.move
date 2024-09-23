@@ -22,14 +22,13 @@ module crowdfund_addr::crowdfund_test {
     const ERROR_MIN_DURATION_NOT_REACHED : u64              = 4;
     const ERROR_MIN_CONTRIBUTION_AMOUNT_NOT_REACHED : u64   = 5;
     const ERROR_INVALID_FUNDING_TYPE : u64                  = 6;
-    const ERROR_CAMPAIGN_NOT_ACTIVE : u64                   = 7;
-    const ERROR_CAMPAIGN_IS_OVER : u64                      = 8;
-    const ERROR_CAMPAIGN_IS_NOT_OVER : u64                  = 9;
-    const ERROR_CAMPAIGN_FUNDING_GOAL_NOT_REACHED : u64     = 10;
-    const ERROR_CAMPAIGN_FUNDS_ALREADY_CLAIMED : u64        = 11;
-    const ERROR_CONTRIBUTOR_NOT_FOUND : u64                 = 12;
-    const ERROR_REFUND_AMOUNT_IS_ZERO : u64                 = 13;
-    const ERROR_INVALID_NEW_FEE : u64                       = 14;
+    const ERROR_CAMPAIGN_IS_OVER : u64                      = 7;
+    const ERROR_CAMPAIGN_IS_NOT_OVER : u64                  = 8;
+    const ERROR_CAMPAIGN_FUNDING_GOAL_NOT_REACHED : u64     = 9;
+    const ERROR_CAMPAIGN_FUNDS_ALREADY_CLAIMED : u64        = 10;
+    const ERROR_CONTRIBUTOR_NOT_FOUND : u64                 = 11;
+    const ERROR_REFUND_AMOUNT_IS_ZERO : u64                 = 12;
+    const ERROR_INVALID_NEW_FEE : u64                       = 13;
 
     // -----------------------------------
     // Constants
@@ -55,7 +54,7 @@ module crowdfund_addr::crowdfund_test {
         creator : address, 
         name : String,
         description : String,
-        funding_type: u64, 
+        funding_type: u8, 
         fee : u64, // changes to fees on module should not affect campaigns that are already live
 
         funding_goal : u64,
@@ -67,7 +66,6 @@ module crowdfund_addr::crowdfund_test {
         end_timestamp : u64,
         contributors: SmartTable<address, u64>, 
         
-        active : bool,
         claimed : bool,
         is_successful : bool
     }
@@ -265,7 +263,6 @@ module crowdfund_addr::crowdfund_test {
             campaign_refunded_amount, 
             campaign_duration, 
             campaign_end_timestamp, 
-            campaign_active, 
             campaign_claimed, 
             campaign_is_successful
         ) = crowdfund::get_campaign(0);
@@ -288,9 +285,8 @@ module crowdfund_addr::crowdfund_test {
         assert!(campaign_duration               == duration      , 110);
         assert!(campaign_end_timestamp          == end_timestamp , 111);
 
-        assert!(campaign_active                 == true          , 112);
-        assert!(campaign_claimed                == false         , 113);
-        assert!(campaign_is_successful          == false         , 114);
+        assert!(campaign_claimed                == false         , 112);
+        assert!(campaign_is_successful          == false         , 113);
 
         // check event emits expected info
         let campaign_created_event = crowdfund::test_CampaignCreatedEvent(
@@ -330,6 +326,62 @@ module crowdfund_addr::crowdfund_test {
 
         // verify if expected event was emitted
         assert!(was_event_emitted(&campaign_updated_event), 115);
+    }
+
+
+    #[test(aptos_framework = @0x1, crowdfund=@crowdfund_addr, creator = @0x222, contributor = @0x333, contributor_two = @0x444)]
+    public entry fun test_creator_can_create_multiple_campaigns(
+        aptos_framework: &signer,
+        crowdfund: &signer,
+        creator: &signer,
+        contributor: &signer,
+        contributor_two: &signer,
+    ) {
+
+        // setup environment
+        crowdfund::setup_test(aptos_framework, crowdfund, creator, contributor, contributor_two, TEST_START_TIME);
+
+        // set up initial values for creating a campaign
+        let name            = std::string::utf8(b"Test Campaign");
+        let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
+        let funding_goal    = 100_000_000;
+        let duration        = 86400; // 86400 seconds from now
+        let funding_type    = 1;
+
+        // call create_campaign
+        crowdfund::create_campaign(
+            creator,
+            name,
+            description,
+            image_url,
+            funding_goal,
+            duration,
+            funding_type
+        );
+
+        // call create_campaign again
+        crowdfund::create_campaign(
+            creator,
+            name,
+            description,
+            image_url,
+            funding_goal,
+            duration,
+            funding_type
+        );
+
+        // call create_campaign again
+        crowdfund::create_campaign(
+            creator,
+            name,
+            description,
+            image_url,
+            funding_goal,
+            duration,
+            funding_type
+        );
+
     }
 
 
@@ -380,7 +432,7 @@ module crowdfund_addr::crowdfund_test {
 
 
     #[test(aptos_framework = @0x1, crowdfund=@crowdfund_addr, creator = @0x222, contributor = @0x333, contributor_two = @0x444)]
-    #[expected_failure(abort_code = ERROR_CAMPAIGN_NOT_ACTIVE, location = crowdfund)]
+    #[expected_failure(abort_code = ERROR_CAMPAIGN_IS_OVER, location = crowdfund)]
     public entry fun test_creator_cannot_update_campaign_after_it_is_no_longer_active(
         aptos_framework: &signer,
         crowdfund: &signer,
@@ -520,7 +572,6 @@ module crowdfund_addr::crowdfund_test {
             campaign_refunded_amount, 
             _campaign_duration, 
             _campaign_end_timestamp, 
-            _campaign_active, 
             _campaign_claimed, 
             _campaign_is_successful
         ) = crowdfund::get_campaign(0);
@@ -870,68 +921,6 @@ module crowdfund_addr::crowdfund_test {
 
 
     #[test(aptos_framework = @0x1, crowdfund=@crowdfund_addr, creator = @0x222, contributor = @0x333, contributor_two = @0x444)]
-    #[expected_failure(abort_code = ERROR_CAMPAIGN_NOT_ACTIVE, location = crowdfund)]
-    public entry fun test_user_should_not_be_able_to_contribute_if_campaign_is_no_longer_active(
-        aptos_framework: &signer,
-        crowdfund: &signer,
-        creator: &signer,
-        contributor: &signer,
-        contributor_two: &signer,
-    ) {
-
-        // setup environment
-        let (_crowdfund_addr, _creator_addr, _contributor_addr, _contributor_two_addr) = crowdfund::setup_test(aptos_framework, crowdfund, creator, contributor, contributor_two, TEST_START_TIME);
-
-        // set up initial values for creating a campaign
-        let name            = std::string::utf8(b"Test Campaign");
-        let description     = std::string::utf8(b"Test Description");
-        let image_url       = std::string::utf8(b"Test Image Url");
-        let funding_goal    = 100_000_000;
-        let duration        = 86400; 
-        let funding_type    = 1; // ALL OR NOTHING FUNDING TYPE     
-
-        // call create_campaign
-        crowdfund::create_campaign(
-            creator,
-            name,
-            description,
-            image_url,
-            funding_goal,
-            duration,
-            funding_type
-        );
-
-        // set up initial values for contributing to a campaign
-        let campaign_id = 0;
-        let amount      = 100_000_000;
-        
-        // call contribute
-        crowdfund::contribute(
-            contributor,
-            campaign_id,
-            amount
-        );
-
-        // fast forward to campaign over
-        timestamp::fast_forward_seconds(duration + 1);
-
-        // creator can claim funds
-        crowdfund::claim_funds(
-            creator,
-            0
-        );
-
-        // user should not be able to contribute as campaign is no longer active
-        crowdfund::contribute(
-            contributor,
-            campaign_id,
-            amount
-        );
-
-    }
-
-
-    #[test(aptos_framework = @0x1, crowdfund=@crowdfund_addr, creator = @0x222, contributor = @0x333, contributor_two = @0x444)]
     public entry fun test_creator_should_be_able_to_claim_campaign_funds_anytime_for_KEEP_IT_ALL_Funding_Type(
         aptos_framework: &signer,
         crowdfund: &signer,
@@ -1074,7 +1063,6 @@ module crowdfund_addr::crowdfund_test {
             campaign_refunded_amount, 
             campaign_duration, 
             campaign_end_timestamp, 
-            campaign_active, 
             campaign_claimed, 
             campaign_is_successful
         ) = crowdfund::get_campaign(0);
@@ -1095,9 +1083,8 @@ module crowdfund_addr::crowdfund_test {
         assert!(campaign_duration               == duration      , 110);
         assert!(campaign_end_timestamp          == end_timestamp , 111);
 
-        assert!(campaign_active                 == false          , 112);
-        assert!(campaign_claimed                == true           , 113);
-        assert!(campaign_is_successful          == true           , 114);
+        assert!(campaign_claimed                == true          , 112);
+        assert!(campaign_is_successful          == true          , 113);
     }
 
 
@@ -1178,7 +1165,6 @@ module crowdfund_addr::crowdfund_test {
             campaign_refunded_amount, 
             campaign_duration, 
             campaign_end_timestamp, 
-            campaign_active, 
             campaign_claimed, 
             campaign_is_successful
         ) = crowdfund::get_campaign(0);
@@ -1199,9 +1185,8 @@ module crowdfund_addr::crowdfund_test {
         assert!(campaign_duration               == duration       , 111);
         assert!(campaign_end_timestamp          == end_timestamp  , 112);
 
-        assert!(campaign_active                 == true           , 113);
-        assert!(campaign_claimed                == false          , 114);
-        assert!(campaign_is_successful          == true           , 115);
+        assert!(campaign_claimed                == false          , 113);
+        assert!(campaign_is_successful          == true           , 114);
 
         // Second contribution
         let amount_two = 150_000_000;
@@ -1247,7 +1232,6 @@ module crowdfund_addr::crowdfund_test {
             campaign_refunded_amount, 
             _campaign_duration, 
             _campaign_end_timestamp, 
-            _campaign_active, 
             _campaign_claimed, 
             _campaign_is_successful
         ) = crowdfund::get_campaign(0);
@@ -1301,7 +1285,6 @@ module crowdfund_addr::crowdfund_test {
             campaign_refunded_amount, 
             _campaign_duration, 
             _campaign_end_timestamp, 
-            _campaign_active, 
             _campaign_claimed, 
             _campaign_is_successful
         ) = crowdfund::get_campaign(0);
@@ -1523,7 +1506,7 @@ module crowdfund_addr::crowdfund_test {
 
 
     #[test(aptos_framework = @0x1, crowdfund=@crowdfund_addr, creator = @0x222, contributor = @0x333, contributor_two = @0x444)]
-    #[expected_failure(abort_code = ERROR_CAMPAIGN_NOT_ACTIVE, location = crowdfund)]
+    #[expected_failure(abort_code = ERROR_CAMPAIGN_FUNDS_ALREADY_CLAIMED, location = crowdfund)]
     public entry fun test_creator_should_not_be_able_to_claim_campaign_funds_for_ALL_OR_NOTHING_Funding_Type_more_than_once(
         aptos_framework: &signer,
         crowdfund: &signer,
@@ -1668,7 +1651,6 @@ module crowdfund_addr::crowdfund_test {
             campaign_refunded_amount, 
             _campaign_duration, 
             _campaign_end_timestamp, 
-            _campaign_active, 
             _campaign_claimed, 
             _campaign_is_successful
         ) = crowdfund::get_campaign(0);
@@ -1700,7 +1682,6 @@ module crowdfund_addr::crowdfund_test {
             campaign_refunded_amount, 
             _campaign_duration, 
             _campaign_end_timestamp, 
-            _campaign_active, 
             _campaign_claimed, 
             _campaign_is_successful
         ) = crowdfund::get_campaign(0);
@@ -1790,7 +1771,6 @@ module crowdfund_addr::crowdfund_test {
             campaign_refunded_amount, 
             _campaign_duration, 
             _campaign_end_timestamp, 
-            _campaign_active, 
             _campaign_claimed, 
             _campaign_is_successful
         ) = crowdfund::get_campaign(0);
