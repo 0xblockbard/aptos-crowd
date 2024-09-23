@@ -26,22 +26,21 @@ module crowdfund_addr::crowdfund {
     const ERROR_MIN_DURATION_NOT_REACHED : u64              = 4;
     const ERROR_MIN_CONTRIBUTION_AMOUNT_NOT_REACHED : u64   = 5;
     const ERROR_INVALID_FUNDING_TYPE : u64                  = 6;
-    const ERROR_CAMPAIGN_NOT_ACTIVE : u64                   = 7;
-    const ERROR_CAMPAIGN_IS_OVER : u64                      = 8;
-    const ERROR_CAMPAIGN_IS_NOT_OVER : u64                  = 9;
-    const ERROR_CAMPAIGN_FUNDING_GOAL_NOT_REACHED : u64     = 10;
-    const ERROR_CAMPAIGN_FUNDS_ALREADY_CLAIMED : u64        = 11;
-    const ERROR_CONTRIBUTOR_NOT_FOUND : u64                 = 12;
-    const ERROR_REFUND_AMOUNT_IS_ZERO : u64                 = 13;
-    const ERROR_INVALID_NEW_FEE : u64                       = 14;
+    const ERROR_CAMPAIGN_IS_OVER : u64                      = 7;
+    const ERROR_CAMPAIGN_IS_NOT_OVER : u64                  = 8;
+    const ERROR_CAMPAIGN_FUNDING_GOAL_NOT_REACHED : u64     = 9;
+    const ERROR_CAMPAIGN_FUNDS_ALREADY_CLAIMED : u64        = 10;
+    const ERROR_CONTRIBUTOR_NOT_FOUND : u64                 = 11;
+    const ERROR_REFUND_AMOUNT_IS_ZERO : u64                 = 12;
+    const ERROR_INVALID_NEW_FEE : u64                       = 13;
 
     // -----------------------------------
     // Constants
     // -----------------------------------
 
     // Funding Type constants
-    const KEEP_IT_ALL_FUNDING_TYPE : u64            = 0;
-    const ALL_OR_NOTHING_FUNDING_TYPE : u64         = 1;
+    const KEEP_IT_ALL_FUNDING_TYPE : u8             = 0;
+    const ALL_OR_NOTHING_FUNDING_TYPE : u8          = 1;
 
     // Config defaults
     const DEFAULT_MIN_FUNDING_GOAL : u64            = 100_000_000; // 1 APT
@@ -60,7 +59,7 @@ module crowdfund_addr::crowdfund {
         name : String,
         description : String,
         image_url: String,
-        funding_type: u64, 
+        funding_type: u8, 
         fee : u64, // changes to fees on module should not affect campaigns that are already live
 
         funding_goal : u64,
@@ -72,15 +71,19 @@ module crowdfund_addr::crowdfund {
         end_timestamp : u64,
         contributors: SmartTable<address, u64>, 
         
-        active : bool,
         claimed : bool,
         is_successful : bool
     }
 
     /// Campaigns Struct
-    struct Campaigns has key, store {
+    struct CreatorCampaigns has key, store {
         campaigns : SmartTable<u64, Campaign>, 
-        next_campaign_id : u64,
+    }
+
+    /// CampaignRegistry Struct
+    struct CampaignRegistry has key, store {
+        campaign_to_creator: SmartTable<u64, address>,
+        next_campaign_id: u64,
     }
 
     /// Config Struct 
@@ -115,7 +118,7 @@ module crowdfund_addr::crowdfund {
         funding_goal : u64,
         duration : u64,
         end_timestamp : u64,
-        funding_type : u64,
+        funding_type : u8,
     }
 
     #[event]
@@ -178,9 +181,9 @@ module crowdfund_addr::crowdfund {
             fee                     : DEFAULT_FEE
         });
 
-        // init campaigns struct
-        move_to(crowdfund_signer, Campaigns {
-            campaigns: smart_table::new(),
+        // init campaign registry struct
+        move_to(crowdfund_signer, CampaignRegistry {
+            campaign_to_creator: smart_table::new(),
             next_campaign_id: 0,
         });
     }
@@ -228,12 +231,21 @@ module crowdfund_addr::crowdfund {
         image_url: String,
         funding_goal : u64,
         duration : u64,
-        funding_type: u64
-    ) : () acquires Config, Campaigns {
+        funding_type: u8
+    ) : () acquires Config, CampaignRegistry, CreatorCampaigns {
 
         let crowdfund_signer_addr = get_crowdfund_signer_addr();
+        let creator_address       = signer::address_of(creator);
         let config                = borrow_global<Config>(crowdfund_signer_addr);
-        let campaigns             = borrow_global_mut<Campaigns>(crowdfund_signer_addr);
+        let campaign_registry     = borrow_global_mut<CampaignRegistry>(crowdfund_signer_addr);
+
+        // check if creator has creator campaigns
+        if (!exists<CreatorCampaigns>(creator_address)) {
+            move_to(creator, CreatorCampaigns {
+                campaigns: smart_table::new(),
+            });
+        };
+        let creator_campaigns = borrow_global_mut<CreatorCampaigns>(creator_address);
 
         // verify min config requirements met
         assert!(funding_goal >= config.min_funding_goal, ERROR_MIN_FUNDING_GOAL_NOT_REACHED);
@@ -242,12 +254,15 @@ module crowdfund_addr::crowdfund {
         // verify valid funding type
         assert!(funding_type == 0 || funding_type == 1, ERROR_INVALID_FUNDING_TYPE);
 
-        let campaign_id    = campaigns.next_campaign_id;
+        // get next campaign id from registry
+        let campaign_id                    = campaign_registry.next_campaign_id;
+        campaign_registry.next_campaign_id = campaign_registry.next_campaign_id + 1;
+
+        // set timestamps
         let current_time   = aptos_framework::timestamp::now_seconds();
         let end_timestamp  = current_time + duration;
 
-        let creator_address = signer::address_of(creator);
-
+        // create campaign
         let campaign = Campaign {
             creator : creator_address, 
             name, 
@@ -266,15 +281,13 @@ module crowdfund_addr::crowdfund {
             end_timestamp,
             contributors : smart_table::new<address, u64>(),
 
-            active : true,
             claimed : false,
             is_successful : false
         };
-
-        smart_table::add(&mut campaigns.campaigns, campaign_id, campaign);
-
-        // update next campaign id
-        campaigns.next_campaign_id = campaigns.next_campaign_id + 1;
+        smart_table::add(&mut creator_campaigns.campaigns, campaign_id, campaign);
+        
+        // update campaign registry
+        smart_table::add(&mut campaign_registry.campaign_to_creator, campaign_id, creator_address);
 
         // Emit CampaignCreatedEvent
         let event = CampaignCreatedEvent {
@@ -298,20 +311,25 @@ module crowdfund_addr::crowdfund {
         name: String,
         description: String,
         image_url: String
-    ) acquires Campaigns {
+    ) acquires CreatorCampaigns, CampaignRegistry {
 
         // init
         let crowdfund_signer_addr = get_crowdfund_signer_addr();
-        let campaigns             = borrow_global_mut<Campaigns>(crowdfund_signer_addr);
+        let campaign_registry     = borrow_global<CampaignRegistry>(crowdfund_signer_addr);
+
+        // get creator address from registry
+        let creator_address       = *smart_table::borrow(&campaign_registry.campaign_to_creator, campaign_id);
         
         // find campaign by id
-        let campaign = smart_table::borrow_mut(&mut campaigns.campaigns, campaign_id);
+        let creator_campaigns     = borrow_global_mut<CreatorCampaigns>(creator_address);
+        let campaign              = smart_table::borrow_mut(&mut creator_campaigns.campaigns, campaign_id);
 
         // verify is creator
         assert!(signer::address_of(creator) == campaign.creator, ERROR_NOT_CAMPAIGN_CREATOR);
 
-        // verify campaign is still active and not past end timestamp
-        assert!(campaign.active, ERROR_CAMPAIGN_NOT_ACTIVE);
+        // verify campaign is not past end timestamp
+        let current_time = aptos_framework::timestamp::now_seconds();
+        assert!(current_time <= campaign.end_timestamp, ERROR_CAMPAIGN_IS_OVER);
 
          // update the campaigns contributed and leftover amounts
         campaign.name           = name;
@@ -334,19 +352,21 @@ module crowdfund_addr::crowdfund {
         contributor : &signer,
         campaign_id : u64,
         amount : u64
-    ) acquires Config, Campaigns {
+    ) acquires Config, CreatorCampaigns, CampaignRegistry {
 
         // init
         let crowdfund_signer_addr = get_crowdfund_signer_addr();
         let config                = borrow_global<Config>(crowdfund_signer_addr);
-        let campaigns             = borrow_global_mut<Campaigns>(crowdfund_signer_addr);
+        let campaign_registry     = borrow_global<CampaignRegistry>(crowdfund_signer_addr);
+
+        // get creator address from registry
+        let creator_address       = *smart_table::borrow(&campaign_registry.campaign_to_creator, campaign_id);
         
         // find campaign by id
-        let campaign = smart_table::borrow_mut(&mut campaigns.campaigns, campaign_id);
+        let creator_campaigns     = borrow_global_mut<CreatorCampaigns>(creator_address);
+        let campaign              = smart_table::borrow_mut(&mut creator_campaigns.campaigns, campaign_id);
 
-        // verify campaign is still active and not past end timestamp
-        assert!(campaign.active, ERROR_CAMPAIGN_NOT_ACTIVE);
-
+        // verify campaign is not past end timestamp
         let current_time = aptos_framework::timestamp::now_seconds();
         assert!(current_time <= campaign.end_timestamp, ERROR_CAMPAIGN_IS_OVER);
 
@@ -383,20 +403,25 @@ module crowdfund_addr::crowdfund {
     public entry fun claim_funds(
         creator: &signer,
         campaign_id: u64
-    ) acquires Campaigns, CrowdfundSigner {
+    ) acquires CreatorCampaigns, CampaignRegistry, CrowdfundSigner {
 
+        // init
         let crowdfund_signer_addr = get_crowdfund_signer_addr();
         let crowdfund_signer      = get_crowdfund_signer(crowdfund_signer_addr);
-        let campaigns             = borrow_global_mut<Campaigns>(crowdfund_signer_addr);
+        let campaign_registry     = borrow_global<CampaignRegistry>(crowdfund_signer_addr);
+
+        // get creator address from registry
+        let creator_address       = *smart_table::borrow(&campaign_registry.campaign_to_creator, campaign_id);
         
         // find campaign by id
-        let campaign = smart_table::borrow_mut(&mut campaigns.campaigns, campaign_id);
+        let creator_campaigns     = borrow_global_mut<CreatorCampaigns>(creator_address);
+        let campaign              = smart_table::borrow_mut(&mut creator_campaigns.campaigns, campaign_id);
 
         // verify the creator is the campaign creator
         assert!(signer::address_of(creator) == campaign.creator, ERROR_NOT_CAMPAIGN_CREATOR);
 
-        // verify campaign is still active
-        assert!(campaign.active, ERROR_CAMPAIGN_NOT_ACTIVE);
+        // verify campaign has not been claimed already
+        assert!(!campaign.claimed, ERROR_CAMPAIGN_FUNDS_ALREADY_CLAIMED);
 
         // get current time
         let current_time = aptos_framework::timestamp::now_seconds();
@@ -427,7 +452,6 @@ module crowdfund_addr::crowdfund {
             campaign.leftover_amount = 0;
 
             if(current_time >= campaign.end_timestamp){
-                campaign.active   = false;
                 campaign.claimed  = true;
             };
 
@@ -464,7 +488,6 @@ module crowdfund_addr::crowdfund {
             campaign.leftover_amount    = 0;
             campaign.is_successful      = true;
             campaign.claimed            = true;
-            campaign.active             = false;
 
             // Emit ClaimFundsEvent
             let event = ClaimFundsEvent {
@@ -481,14 +504,19 @@ module crowdfund_addr::crowdfund {
     public entry fun refund(
         contributor: &signer,
         campaign_id: u64
-    ) acquires Campaigns, CrowdfundSigner {
+    ) acquires CreatorCampaigns, CampaignRegistry, CrowdfundSigner {
 
+        // init
         let crowdfund_signer_addr = get_crowdfund_signer_addr();
         let crowdfund_signer      = get_crowdfund_signer(crowdfund_signer_addr);
-        let campaigns             = borrow_global_mut<Campaigns>(crowdfund_signer_addr);
+        let campaign_registry     = borrow_global<CampaignRegistry>(crowdfund_signer_addr);
+
+        // get creator address from registry
+        let creator_address       = *smart_table::borrow(&campaign_registry.campaign_to_creator, campaign_id);
         
         // find campaign by id
-        let campaign = smart_table::borrow_mut(&mut campaigns.campaigns, campaign_id);
+        let creator_campaigns     = borrow_global_mut<CreatorCampaigns>(creator_address);
+        let campaign              = smart_table::borrow_mut(&mut creator_campaigns.campaigns, campaign_id);
 
         // verify campaign funding type is ALL_OR_NOTHING (AON) - only AON funding type can be refunded
         assert!(campaign.funding_type == 1, ERROR_INVALID_FUNDING_TYPE);
@@ -498,7 +526,7 @@ module crowdfund_addr::crowdfund {
         assert!(current_time >= campaign.end_timestamp, ERROR_CAMPAIGN_IS_NOT_OVER);
 
         // verify campaign funds has not already been claimed
-        assert!(campaign.claimed != true, ERROR_CAMPAIGN_FUNDS_ALREADY_CLAIMED);
+        assert!(!campaign.claimed, ERROR_CAMPAIGN_FUNDS_ALREADY_CLAIMED);
 
         // get user's contribution
         let contributor_address = signer::address_of(contributor);
@@ -542,14 +570,19 @@ module crowdfund_addr::crowdfund {
 
     #[view]
     public fun get_campaign(campaign_id: u64): (
-        address, String, String, String, u64, u64, u64, u64, u64, u64, u64, u64, u64, bool, bool, bool
-    ) acquires Campaigns {
+        address, String, String, String, u8, u64, u64, u64, u64, u64, u64, u64, u64, bool, bool
+    ) acquires CreatorCampaigns, CampaignRegistry {
+        
         let crowdfund_signer_addr = get_crowdfund_signer_addr();
-        let campaigns = borrow_global<Campaigns>(crowdfund_signer_addr);
+        let campaign_registry     = borrow_global<CampaignRegistry>(crowdfund_signer_addr);
+
+        // get creator address from registry
+        let creator_address       = *smart_table::borrow(&campaign_registry.campaign_to_creator, campaign_id);
         
-        // find the campaign by id
-        let campaign_ref = smart_table::borrow(&campaigns.campaigns, campaign_id);
-        
+        // find campaign by id
+        let creator_campaigns     = borrow_global<CreatorCampaigns>(creator_address);
+        let campaign_ref          = smart_table::borrow(&creator_campaigns.campaigns, campaign_id);
+
         // return the necessary fields from the campaign
         (
             campaign_ref.creator,
@@ -568,7 +601,6 @@ module crowdfund_addr::crowdfund {
             campaign_ref.duration,
             campaign_ref.end_timestamp,
             
-            campaign_ref.active,
             campaign_ref.claimed,
             campaign_ref.is_successful
         )
@@ -577,22 +609,26 @@ module crowdfund_addr::crowdfund {
     #[view]
     public fun get_next_campaign_id(): (
         u64
-    ) acquires Campaigns {
+    ) acquires CampaignRegistry {
         
         let crowdfund_signer_addr = get_crowdfund_signer_addr();
-        let campaigns = borrow_global<Campaigns>(crowdfund_signer_addr);
+        let campaign_registry     = borrow_global<CampaignRegistry>(crowdfund_signer_addr);
         
-        campaigns.next_campaign_id
+        campaign_registry.next_campaign_id
     }
 
     #[view]
-    public fun get_contributor_amount(campaign_id: u64, contributor: address) : u64 acquires Campaigns {
+    public fun get_contributor_amount(campaign_id: u64, contributor: address) : u64 acquires CreatorCampaigns, CampaignRegistry {
         
         let crowdfund_signer_addr = get_crowdfund_signer_addr();
-        let campaigns = borrow_global<Campaigns>(crowdfund_signer_addr);
+        let campaign_registry     = borrow_global<CampaignRegistry>(crowdfund_signer_addr);
+
+        // get creator address from registry
+        let creator_address       = *smart_table::borrow(&campaign_registry.campaign_to_creator, campaign_id);
         
-        // find the campaign by id
-        let campaign_ref = smart_table::borrow(&campaigns.campaigns, campaign_id);
+        // find campaign by id
+        let creator_campaigns     = borrow_global<CreatorCampaigns>(creator_address);
+        let campaign_ref          = smart_table::borrow(&creator_campaigns.campaigns, campaign_id);
 
         // get the contribution amount for the specific contributor
         if (!smart_table::contains(&campaign_ref.contributors, contributor)) {
@@ -713,7 +749,7 @@ module crowdfund_addr::crowdfund {
         funding_goal : u64,
         duration : u64,
         end_timestamp : u64,
-        funding_type : u64
+        funding_type : u8
     ): CampaignCreatedEvent {
         let event = CampaignCreatedEvent{
             campaign_id,
