@@ -4,11 +4,11 @@ version = "1.0.0"
 authors = []
 
 [addresses]
-crowdfund_addr = '8e437302ac994687818a81c59a2ac8c1b04732ed8cb8a732c03aeed2e6b4c791'
-# crowdfund_addr = '_'
+# crowdfund_addr = '8e437302ac994687818a81c59a2ac8c1b04732ed8cb8a732c03aeed2e6b4c791'
+crowdfund_addr = '_'
 
-# [dev-addresses]
-# crowdfund_addr = '0x111'
+[dev-addresses]
+crowdfund_addr = '0x111'
 
 [dependencies]
 AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "mainnet", subdir = "aptos-move/framework/aptos-framework"}
