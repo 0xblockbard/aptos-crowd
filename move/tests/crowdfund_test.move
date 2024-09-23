@@ -123,6 +123,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 10_000_000; // should be at least 100_000_000 or 1 APT
         let duration        = 86400; 
         let funding_type    = 1;
@@ -132,6 +133,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -156,6 +158,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86000;  // should be at least 86400 (1 day in seconds)
         let funding_type    = 1;
@@ -165,6 +168,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -189,6 +193,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400;  
         let funding_type    = 2; // should be 0 or 1
@@ -198,6 +203,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -206,7 +212,7 @@ module crowdfund_addr::crowdfund_test {
 
 
     #[test(aptos_framework = @0x1, crowdfund=@crowdfund_addr, creator = @0x222, contributor = @0x333, contributor_two = @0x444)]
-    public entry fun test_create_campaign(
+    public entry fun test_create_and_update_campaign(
         aptos_framework: &signer,
         crowdfund: &signer,
         creator: &signer,
@@ -222,25 +228,34 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; // 86400 seconds from now
         let funding_type    = 1;
+
+        // get next campaign id
+        let next_campaign_id = crowdfund::get_next_campaign_id();
 
         // call create_campaign
         crowdfund::create_campaign(
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
         );
+
+        // verify next id is 0
+        assert!(next_campaign_id == 0, 99);
 
         // get campaign from view
         let (
             creator_address, 
             campaign_name, 
             campaign_description, 
+            campaign_image_url, 
             campaign_funding_type, 
             _campaign_fee, 
             campaign_funding_goal, 
@@ -261,26 +276,29 @@ module crowdfund_addr::crowdfund_test {
         assert!(creator_address                 == creator_addr  , 100);
         assert!(campaign_name                   == name          , 101);
         assert!(campaign_description            == description   , 102);
-        assert!(campaign_funding_type           == funding_type  , 103);
-        assert!(campaign_funding_goal           == funding_goal  , 104);
+        assert!(campaign_image_url              == image_url     , 103);
+        assert!(campaign_funding_type           == funding_type  , 104);
+        assert!(campaign_funding_goal           == funding_goal  , 105);
 
-        assert!(campaign_contributed_amount     == 0             , 105);
-        assert!(campaign_claimed_amount         == 0             , 106);
-        assert!(campaign_leftover_amount        == 0             , 107);
-        assert!(campaign_refunded_amount        == 0             , 108);
+        assert!(campaign_contributed_amount     == 0             , 106);
+        assert!(campaign_claimed_amount         == 0             , 107);
+        assert!(campaign_leftover_amount        == 0             , 108);
+        assert!(campaign_refunded_amount        == 0             , 109);
 
-        assert!(campaign_duration               == duration      , 109);
-        assert!(campaign_end_timestamp          == end_timestamp , 110);
+        assert!(campaign_duration               == duration      , 110);
+        assert!(campaign_end_timestamp          == end_timestamp , 111);
 
-        assert!(campaign_active                 == true          , 111);
-        assert!(campaign_claimed                == false         , 112);
-        assert!(campaign_is_successful          == false         , 113);
+        assert!(campaign_active                 == true          , 112);
+        assert!(campaign_claimed                == false         , 113);
+        assert!(campaign_is_successful          == false         , 114);
 
         // check event emits expected info
         let campaign_created_event = crowdfund::test_CampaignCreatedEvent(
             0,                  // campaign_id
             creator_address,
             name,
+            description,
+            image_url,
             funding_goal,
             duration,
             end_timestamp,
@@ -289,6 +307,141 @@ module crowdfund_addr::crowdfund_test {
 
         // verify if expected event was emitted
         assert!(was_event_emitted(&campaign_created_event), 114);
+
+        // call update_campaign
+        let new_name        = std::string::utf8(b"New Test Campaign Name");
+        let new_description = std::string::utf8(b"New Test Campaign Description");
+        let new_image_url   = std::string::utf8(b"New Test Campaign Image Url");
+        crowdfund::update_campaign(
+            creator,
+            0,
+            new_name,
+            new_description,
+            new_image_url
+        );
+
+        // check event emits expected info
+        let campaign_updated_event = crowdfund::test_CampaignUpdatedEvent(
+            0,                  // campaign_id
+            new_name,
+            new_description,
+            new_image_url
+        );
+
+        // verify if expected event was emitted
+        assert!(was_event_emitted(&campaign_updated_event), 115);
+    }
+
+
+    #[test(aptos_framework = @0x1, crowdfund=@crowdfund_addr, creator = @0x222, contributor = @0x333, contributor_two = @0x444)]
+    #[expected_failure(abort_code = ERROR_NOT_CAMPAIGN_CREATOR, location = crowdfund)]
+    public entry fun test_non_creator_cannot_update_campaign(
+        aptos_framework: &signer,
+        crowdfund: &signer,
+        creator: &signer,
+        contributor: &signer,
+        contributor_two: &signer,
+    ) {
+
+        // setup environment
+        crowdfund::setup_test(aptos_framework, crowdfund, creator, contributor, contributor_two, TEST_START_TIME);
+
+        // set up initial values for creating a campaign
+        let name            = std::string::utf8(b"Test Campaign");
+        let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
+        let funding_goal    = 100_000_000;
+        let duration        = 86400; // 86400 seconds from now
+        let funding_type    = 1;
+
+        // call create_campaign
+        crowdfund::create_campaign(
+            creator,
+            name,
+            description,
+            image_url,
+            funding_goal,
+            duration,
+            funding_type
+        );
+
+        // call update_campaign
+        let new_name        = std::string::utf8(b"New Test Campaign Name");
+        let new_description = std::string::utf8(b"New Test Campaign Description");
+        let new_image_url   = std::string::utf8(b"New Test Campaign Image Url");
+        crowdfund::update_campaign(
+            contributor, // non-creator
+            0,
+            new_name,
+            new_description,
+            new_image_url
+        );
+    }
+
+
+    #[test(aptos_framework = @0x1, crowdfund=@crowdfund_addr, creator = @0x222, contributor = @0x333, contributor_two = @0x444)]
+    #[expected_failure(abort_code = ERROR_CAMPAIGN_NOT_ACTIVE, location = crowdfund)]
+    public entry fun test_creator_cannot_update_campaign_after_it_is_no_longer_active(
+        aptos_framework: &signer,
+        crowdfund: &signer,
+        creator: &signer,
+        contributor: &signer,
+        contributor_two: &signer,
+    ) {
+
+        // setup environment
+        crowdfund::setup_test(aptos_framework, crowdfund, creator, contributor, contributor_two, TEST_START_TIME);
+
+        // set up initial values for creating a campaign
+        let name            = std::string::utf8(b"Test Campaign");
+        let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
+        let funding_goal    = 100_000_000;
+        let duration        = 86400; // 86400 seconds from now
+        let funding_type    = 1;
+
+        // call create_campaign
+        crowdfund::create_campaign(
+            creator,
+            name,
+            description,
+            image_url,
+            funding_goal,
+            duration,
+            funding_type
+        );
+
+        // set up initial values for contributing to a campaign
+        let campaign_id = 0;
+        let amount      = 150_000_000;
+        
+        // call contribute
+        crowdfund::contribute(
+            contributor,
+            campaign_id,
+            amount
+        );
+
+        // fast forward to campaign over
+        timestamp::fast_forward_seconds(duration + 1);
+
+        // creator claim funds
+        crowdfund::claim_funds(
+            creator,
+            0 // campaign id
+        );
+
+        // call update_campaign
+        let new_name        = std::string::utf8(b"New Test Campaign Name");
+        let new_description = std::string::utf8(b"New Test Campaign Description");
+        let new_image_url   = std::string::utf8(b"New Test Campaign Image Url");
+        crowdfund::update_campaign(
+            creator,
+            0,
+            new_name,
+            new_description,
+            new_image_url
+        );
     }
 
 
@@ -307,6 +460,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; // 86400 seconds from now
         let funding_type    = 1;
@@ -316,6 +470,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -355,6 +510,7 @@ module crowdfund_addr::crowdfund_test {
             _creator_address, 
             _campaign_name, 
             _campaign_description, 
+            _campaign_image_url,
             _campaign_funding_type, 
             _campaign_fee, 
             _campaign_funding_goal, 
@@ -393,6 +549,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; // 86400 seconds from now
         let funding_type    = 1;
@@ -402,6 +559,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -478,6 +636,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; // 86400 seconds from now
         let funding_type    = 1;
@@ -487,6 +646,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -549,6 +709,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; // 86400 seconds from now
         let funding_type    = 1;
@@ -558,6 +719,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -592,6 +754,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; // 86400 seconds from now
         let funding_type    = 1;
@@ -601,6 +764,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -628,6 +792,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; // 86400 seconds from now
         let funding_type    = 1;
@@ -637,6 +802,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -671,6 +837,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; // 86400 seconds from now
         let funding_type    = 1;
@@ -680,6 +847,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -717,6 +885,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; 
         let funding_type    = 1; // ALL OR NOTHING FUNDING TYPE     
@@ -726,6 +895,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -776,6 +946,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; 
         let funding_type    = 0; // KEEP IT ALL FUNDING TYPE
@@ -785,6 +956,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -837,6 +1009,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; 
         let funding_type    = 0; // KEEP IT ALL FUNDING TYPE
@@ -846,6 +1019,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -889,7 +1063,8 @@ module crowdfund_addr::crowdfund_test {
         let (
             creator_address, 
             campaign_name, 
-            campaign_description, 
+            campaign_description,
+            campaign_image_url, 
             campaign_funding_type, 
             _campaign_fee, 
             campaign_funding_goal, 
@@ -908,20 +1083,21 @@ module crowdfund_addr::crowdfund_test {
         assert!(creator_address                 == creator_addr  , 100);
         assert!(campaign_name                   == name          , 101);
         assert!(campaign_description            == description   , 102);
-        assert!(campaign_funding_type           == funding_type  , 103);
-        assert!(campaign_funding_goal           == funding_goal  , 104);
+        assert!(campaign_image_url              == image_url     , 103);
+        assert!(campaign_funding_type           == funding_type  , 104);
+        assert!(campaign_funding_goal           == funding_goal  , 105);
 
-        assert!(campaign_contributed_amount     == amount                           , 105);
-        assert!(campaign_claimed_amount         == campaign_contributed_amount      , 106);
-        assert!(campaign_leftover_amount        == 0             , 107);
-        assert!(campaign_refunded_amount        == 0             , 108);
+        assert!(campaign_contributed_amount     == amount                           , 106);
+        assert!(campaign_claimed_amount         == campaign_contributed_amount      , 107);
+        assert!(campaign_leftover_amount        == 0             , 108);
+        assert!(campaign_refunded_amount        == 0             , 109);
 
-        assert!(campaign_duration               == duration      , 109);
-        assert!(campaign_end_timestamp          == end_timestamp , 110);
+        assert!(campaign_duration               == duration      , 110);
+        assert!(campaign_end_timestamp          == end_timestamp , 111);
 
-        assert!(campaign_active                 == false          , 111);
-        assert!(campaign_claimed                == true           , 112);
-        assert!(campaign_is_successful          == true           , 113);
+        assert!(campaign_active                 == false          , 112);
+        assert!(campaign_claimed                == true           , 113);
+        assert!(campaign_is_successful          == true           , 114);
     }
 
 
@@ -940,6 +1116,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; 
         let funding_type    = 0; // KEEP IT ALL FUNDING TYPE
@@ -950,6 +1127,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -990,6 +1168,7 @@ module crowdfund_addr::crowdfund_test {
             creator_address, 
             campaign_name, 
             campaign_description, 
+            campaign_image_url, 
             campaign_funding_type, 
             _campaign_fee, 
             campaign_funding_goal, 
@@ -1008,20 +1187,21 @@ module crowdfund_addr::crowdfund_test {
         assert!(creator_address                 == creator_addr   , 101);
         assert!(campaign_name                   == name           , 102);
         assert!(campaign_description            == description    , 103);
-        assert!(campaign_funding_type           == funding_type   , 104);
-        assert!(campaign_funding_goal           == funding_goal   , 105);
+        assert!(campaign_image_url              == image_url      , 104);
+        assert!(campaign_funding_type           == funding_type   , 105);
+        assert!(campaign_funding_goal           == funding_goal   , 106);
 
-        assert!(campaign_contributed_amount     == amount                           , 106);
-        assert!(campaign_claimed_amount         == campaign_contributed_amount      , 107);
-        assert!(campaign_leftover_amount        == 0              , 108);
-        assert!(campaign_refunded_amount        == 0              , 109);
+        assert!(campaign_contributed_amount     == amount                           , 107);
+        assert!(campaign_claimed_amount         == campaign_contributed_amount      , 108);
+        assert!(campaign_leftover_amount        == 0              , 109);
+        assert!(campaign_refunded_amount        == 0              , 110);
 
-        assert!(campaign_duration               == duration       , 110);
-        assert!(campaign_end_timestamp          == end_timestamp  , 111);
+        assert!(campaign_duration               == duration       , 111);
+        assert!(campaign_end_timestamp          == end_timestamp  , 112);
 
-        assert!(campaign_active                 == true           , 112);
-        assert!(campaign_claimed                == false          , 113);
-        assert!(campaign_is_successful          == true           , 114);
+        assert!(campaign_active                 == true           , 113);
+        assert!(campaign_claimed                == false          , 114);
+        assert!(campaign_is_successful          == true           , 115);
 
         // Second contribution
         let amount_two = 150_000_000;
@@ -1057,6 +1237,7 @@ module crowdfund_addr::crowdfund_test {
             _creator_address, 
             _campaign_name, 
             _campaign_description, 
+            _campaign_image_url,
             _campaign_funding_type, 
             _campaign_fee, 
             _campaign_funding_goal, 
@@ -1110,6 +1291,7 @@ module crowdfund_addr::crowdfund_test {
             _creator_address, 
             _campaign_name, 
             _campaign_description, 
+            _campaign_image_url,
             _campaign_funding_type, 
             _campaign_fee, 
             _campaign_funding_goal, 
@@ -1148,6 +1330,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; 
         let funding_type    = 0; // KEEP IT ALL FUNDING TYPE
@@ -1157,6 +1340,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -1198,6 +1382,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; 
         let funding_type    = 1; // ALL OR NOTHING FUNDING TYPE
@@ -1207,6 +1392,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -1247,6 +1433,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; 
         let funding_type    = 1; // ALL OR NOTHING FUNDING TYPE
@@ -1256,6 +1443,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -1296,6 +1484,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; 
         let funding_type    = 1; // ALL OR NOTHING FUNDING TYPE
@@ -1305,6 +1494,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -1348,6 +1538,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; 
         let funding_type    = 1; // ALL OR NOTHING FUNDING TYPE
@@ -1357,6 +1548,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -1406,6 +1598,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; 
         let funding_type    = 1; // ALL OR NOTHING FUNDING TYPE
@@ -1415,6 +1608,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -1464,6 +1658,7 @@ module crowdfund_addr::crowdfund_test {
             _creator_address, 
             _campaign_name, 
             _campaign_description, 
+            _campaign_image_url,
             _campaign_funding_type, 
             _campaign_fee, 
             _campaign_funding_goal, 
@@ -1495,6 +1690,7 @@ module crowdfund_addr::crowdfund_test {
             _creator_address, 
             _campaign_name, 
             _campaign_description, 
+            _campaign_image_url,
             _campaign_funding_type, 
             _campaign_fee, 
             _campaign_funding_goal, 
@@ -1533,6 +1729,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; 
         let funding_type    = 1; // ALL OR NOTHING FUNDING TYPE
@@ -1542,6 +1739,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -1582,6 +1780,7 @@ module crowdfund_addr::crowdfund_test {
             _creator_address, 
             _campaign_name, 
             _campaign_description, 
+            _campaign_image_url,
             _campaign_funding_type, 
             _campaign_fee, 
             _campaign_funding_goal, 
@@ -1619,6 +1818,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; 
         let funding_type    = 1; // ALL OR NOTHING FUNDING TYPE
@@ -1628,6 +1828,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -1682,6 +1883,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; 
         let funding_type    = 1; // ALL OR NOTHING FUNDING TYPE
@@ -1691,6 +1893,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -1751,6 +1954,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; 
         let funding_type    = 1; // ALL OR NOTHING FUNDING TYPE
@@ -1760,6 +1964,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -1801,6 +2006,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; 
         let funding_type    = 0; // KEEP IT ALL FUNDING TYPE
@@ -1810,6 +2016,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -1854,6 +2061,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; 
         let funding_type    = 1; // ALL OR NOTHING FUNDING TYPE
@@ -1863,6 +2071,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
@@ -1913,6 +2122,7 @@ module crowdfund_addr::crowdfund_test {
         // set up initial values for creating a campaign
         let name            = std::string::utf8(b"Test Campaign");
         let description     = std::string::utf8(b"Test Description");
+        let image_url       = std::string::utf8(b"Test Image Url");
         let funding_goal    = 100_000_000;
         let duration        = 86400; 
         let funding_type    = 1; // ALL OR NOTHING FUNDING TYPE
@@ -1922,6 +2132,7 @@ module crowdfund_addr::crowdfund_test {
             creator,
             name,
             description,
+            image_url,
             funding_goal,
             duration,
             funding_type
