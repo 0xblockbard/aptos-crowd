@@ -1,8 +1,11 @@
 module crowdfund_addr::crowdfund {
 
     use std::signer;
+    use std::event;
     use std::string::{String};
+
     use aptos_std::smart_table::{Self, SmartTable};
+    
     use aptos_framework::object;
     use aptos_framework::coin;
     use aptos_framework::aptos_coin::{AptosCoin};
@@ -56,6 +59,7 @@ module crowdfund_addr::crowdfund {
         creator : address, 
         name : String,
         description : String,
+        image_url: String,
         funding_type: u64, 
         fee : u64, // changes to fees on module should not affect campaigns that are already live
 
@@ -106,10 +110,20 @@ module crowdfund_addr::crowdfund {
         campaign_id : u64,
         creator : address,
         name : String,
+        description: String,
+        image_url: String,
         funding_goal : u64,
         duration : u64,
         end_timestamp : u64,
         funding_type : u64,
+    }
+
+    #[event]
+    struct CampaignUpdatedEvent has drop, store {
+        campaign_id : u64,
+        name : String,
+        description: String,
+        image_url: String
     }
 
     #[event]
@@ -190,8 +204,8 @@ module crowdfund_addr::crowdfund {
         let admin_info = borrow_global<AdminInfo>(crowdfund_signer_addr);
         assert!(signer::address_of(admin) == admin_info.admin_address, ERROR_NOT_ADMIN);
 
-        // assert that new fee cannot be greater than 100% or 10000
-        assert!(new_fee <= 10000, ERROR_INVALID_NEW_FEE);
+        // assert that new fee cannot be greater than 5% or 500 (i.e. max cap)
+        assert!(new_fee <= 500, ERROR_INVALID_NEW_FEE);
 
         // update the configuration
         let config = borrow_global_mut<Config>(crowdfund_signer_addr);
@@ -211,6 +225,7 @@ module crowdfund_addr::crowdfund {
         creator : &signer,
         name : String,
         description : String,
+        image_url: String,
         funding_goal : u64,
         duration : u64,
         funding_type: u64
@@ -237,6 +252,7 @@ module crowdfund_addr::crowdfund {
             creator : creator_address, 
             name, 
             description,
+            image_url,
             funding_type, 
             fee : config.fee,
 
@@ -265,12 +281,51 @@ module crowdfund_addr::crowdfund {
             campaign_id,
             creator : creator_address,
             name,
+            description,
+            image_url,
             funding_goal,
             duration,
             end_timestamp,
             funding_type,
         };
-        0x1::event::emit(event);
+        event::emit(event);
+    }
+
+
+    public entry fun update_campaign(
+        creator: &signer,
+        campaign_id: u64,
+        name: String,
+        description: String,
+        image_url: String
+    ) acquires Campaigns {
+
+        // init
+        let crowdfund_signer_addr = get_crowdfund_signer_addr();
+        let campaigns             = borrow_global_mut<Campaigns>(crowdfund_signer_addr);
+        
+        // find campaign by id
+        let campaign = smart_table::borrow_mut(&mut campaigns.campaigns, campaign_id);
+
+        // verify is creator
+        assert!(signer::address_of(creator) == campaign.creator, ERROR_NOT_CAMPAIGN_CREATOR);
+
+        // verify campaign is still active and not past end timestamp
+        assert!(campaign.active, ERROR_CAMPAIGN_NOT_ACTIVE);
+
+         // update the campaigns contributed and leftover amounts
+        campaign.name           = name;
+        campaign.description    = description;
+        campaign.image_url      = image_url;
+
+        // Emit CampaignUpdatedEvent
+        let event = CampaignUpdatedEvent {
+            campaign_id,
+            name,
+            description,
+            image_url
+        };
+        event::emit(event);
 
     }
 
@@ -320,7 +375,7 @@ module crowdfund_addr::crowdfund {
             contributor: signer::address_of(contributor),
             amount,
         };
-        0x1::event::emit(event);
+        event::emit(event);
 
     }
 
@@ -350,13 +405,14 @@ module crowdfund_addr::crowdfund {
             
             // Keep-it-all Funding Type - creators can claim funds at any time
             
+            // update total claimed amount to total contributed amount
             campaign.claimed_amount = campaign.contributed_amount;
 
             if(campaign.contributed_amount >= campaign.funding_goal){
                 campaign.is_successful = true;
             };
 
-            // calculate fees and claim total
+            // calculate fees and claim total from campaign leftover amount to be claimed 
             let fee         = campaign.leftover_amount * campaign.fee / 10000;
             let claim_total = campaign.leftover_amount - fee;
 
@@ -367,6 +423,7 @@ module crowdfund_addr::crowdfund {
                 claim_total
             );
 
+            // set leftover amount to zero now 
             campaign.leftover_amount = 0;
 
             if(current_time >= campaign.end_timestamp){
@@ -379,7 +436,7 @@ module crowdfund_addr::crowdfund {
                 campaign_id,
                 claim_total,
             };
-            0x1::event::emit(event);
+            event::emit(event);
 
         } else {
             
@@ -414,7 +471,7 @@ module crowdfund_addr::crowdfund {
                 campaign_id,
                 claim_total,
             };
-            0x1::event::emit(event);
+            event::emit(event);
 
         };
         
@@ -475,7 +532,7 @@ module crowdfund_addr::crowdfund {
             contributor: signer::address_of(contributor),
             refund_amount,
         };
-        0x1::event::emit(event);
+        event::emit(event);
 
     }
 
@@ -485,7 +542,7 @@ module crowdfund_addr::crowdfund {
 
     #[view]
     public fun get_campaign(campaign_id: u64): (
-        address, String, String, u64, u64, u64, u64, u64, u64, u64, u64, u64, bool, bool, bool
+        address, String, String, String, u64, u64, u64, u64, u64, u64, u64, u64, u64, bool, bool, bool
     ) acquires Campaigns {
         let crowdfund_signer_addr = get_crowdfund_signer_addr();
         let campaigns = borrow_global<Campaigns>(crowdfund_signer_addr);
@@ -498,6 +555,7 @@ module crowdfund_addr::crowdfund {
             campaign_ref.creator,
             campaign_ref.name,
             campaign_ref.description,
+            campaign_ref.image_url,
             campaign_ref.funding_type,
             campaign_ref.fee,
 
@@ -514,6 +572,17 @@ module crowdfund_addr::crowdfund {
             campaign_ref.claimed,
             campaign_ref.is_successful
         )
+    }
+
+    #[view]
+    public fun get_next_campaign_id(): (
+        u64
+    ) acquires Campaigns {
+        
+        let crowdfund_signer_addr = get_crowdfund_signer_addr();
+        let campaigns = borrow_global<Campaigns>(crowdfund_signer_addr);
+        
+        campaigns.next_campaign_id
     }
 
     #[view]
@@ -639,6 +708,8 @@ module crowdfund_addr::crowdfund {
         campaign_id : u64, 
         creator : address,
         name : String,
+        description : String,
+        image_url : String,
         funding_goal : u64,
         duration : u64,
         end_timestamp : u64,
@@ -648,10 +719,29 @@ module crowdfund_addr::crowdfund {
             campaign_id,
             creator,
             name,
+            description,
+            image_url,
             funding_goal,
             duration,
             end_timestamp,
             funding_type
+        };
+        return event
+    }
+
+    #[view]
+    #[test_only]
+    public fun test_CampaignUpdatedEvent(
+        campaign_id : u64, 
+        name : String,
+        description : String,
+        image_url : String,
+    ): CampaignUpdatedEvent {
+        let event = CampaignUpdatedEvent{
+            campaign_id,
+            name,
+            description,
+            image_url
         };
         return event
     }
