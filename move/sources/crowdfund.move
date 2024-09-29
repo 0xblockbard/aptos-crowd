@@ -6,6 +6,7 @@ module crowdfund_addr::crowdfund {
 
     use aptos_std::smart_table::{Self, SmartTable};
     
+    use aptos_framework::aptos_account;
     use aptos_framework::object;
     use aptos_framework::coin;
     use aptos_framework::aptos_coin::{AptosCoin};
@@ -45,7 +46,7 @@ module crowdfund_addr::crowdfund {
     // Config defaults
     const DEFAULT_MIN_FUNDING_GOAL : u64            = 100_000_000; // 1 APT
     const DEFAULT_MIN_DURATION : u64                = 86400;       // 1 day
-    const DEFAULT_MIN_CONTRIBUTION_AMOUNT : u64     = 10_000_000;  // 0.1 APT
+    const DEFAULT_MIN_CONTRIBUTION_AMOUNT : u64     = 100_000;     // 0.001 APT
     const DEFAULT_FEE : u64                         = 100;         // 1%
 
     // -----------------------------------
@@ -348,7 +349,7 @@ module crowdfund_addr::crowdfund {
     }
 
 
-    public entry fun contribute(
+    public entry fun contribute<AptosCoin>(
         contributor : &signer,
         campaign_id : u64,
         amount : u64
@@ -374,7 +375,7 @@ module crowdfund_addr::crowdfund {
         assert!(amount >= config.min_contribution_amount, ERROR_MIN_CONTRIBUTION_AMOUNT_NOT_REACHED);
 
         // transfer Aptos tokens to the module
-        coin::transfer<AptosCoin>(contributor, crowdfund_signer_addr, amount);
+        aptos_account::transfer(contributor, crowdfund_signer_addr, amount);
 
         // add user's contribution
         let contributor_address = signer::address_of(contributor);
@@ -518,7 +519,7 @@ module crowdfund_addr::crowdfund {
         let creator_campaigns     = borrow_global_mut<CreatorCampaigns>(creator_address);
         let campaign              = smart_table::borrow_mut(&mut creator_campaigns.campaigns, campaign_id);
 
-        // verify campaign funding type is ALL_OR_NOTHING (AON) - only AON funding type can be refunded
+        // verify campaign funding type is ALL_OR_NOTHING (AON) - i.e. only AON funding type can be refunded
         assert!(campaign.funding_type == 1, ERROR_INVALID_FUNDING_TYPE);
 
         // verify campaign has ended 
@@ -738,6 +739,7 @@ module crowdfund_addr::crowdfund {
         (crowdfund_addr, creator_addr, contributor_addr, contributor_two_addr)
     }
 
+
     #[view]
     #[test_only]
     public fun test_CampaignCreatedEvent(
@@ -764,6 +766,7 @@ module crowdfund_addr::crowdfund {
         };
         return event
     }
+
 
     #[view]
     #[test_only]

@@ -4,7 +4,7 @@ version = "1.0.0"
 authors = []
 
 [addresses]
-# crowdfund_addr = '8e437302ac994687818a81c59a2ac8c1b04732ed8cb8a732c03aeed2e6b4c791'
+# crowdfund_addr = '0x80fc7c711b3eeef9dc4d46cf2682196478a7dc5c6efaa49af7a5bffdb91c657a'
 crowdfund_addr = '_'
 
 [dev-addresses]

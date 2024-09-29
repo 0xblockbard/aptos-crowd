@@ -5,6 +5,7 @@ module crowdfund_addr::crowdfund_test {
     
     use std::signer;
     use std::string::{String};
+    use aptos_framework::aptos_coin::{AptosCoin};
 
     use aptos_std::smart_table::{SmartTable};
     
@@ -468,7 +469,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 150_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -533,7 +534,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 50_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -621,7 +622,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 30_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -646,7 +647,7 @@ module crowdfund_addr::crowdfund_test {
         assert!(amount == contribution_amount, 101);
 
         // call contribute again
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -708,7 +709,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 50_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -725,7 +726,7 @@ module crowdfund_addr::crowdfund_test {
         assert!(was_event_emitted(&contribution_event), 100);
 
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor_two,
             campaign_id,
             amount
@@ -778,10 +779,10 @@ module crowdfund_addr::crowdfund_test {
 
         // set up initial values for contributing to a campaign
         let campaign_id = 0;
-        let amount      = 5_000_000;
+        let amount      = 5000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -864,7 +865,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 5_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -912,7 +913,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 50_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -956,7 +957,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 150_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -1019,7 +1020,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 150_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -1125,7 +1126,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 150_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -1192,7 +1193,7 @@ module crowdfund_addr::crowdfund_test {
         let amount_two = 150_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor_two,
             campaign_id,
             amount
@@ -1245,7 +1246,7 @@ module crowdfund_addr::crowdfund_test {
         let amount_three = 50_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount_three
@@ -1334,7 +1335,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 150_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -1386,7 +1387,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 150_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -1437,7 +1438,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 150_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -1488,7 +1489,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 50_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -1542,7 +1543,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 150_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -1602,7 +1603,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 70_000_000;
         
         // call contribute (contributor one)
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -1611,7 +1612,7 @@ module crowdfund_addr::crowdfund_test {
         let amount_two  = 50_000_000;
 
         // call contribute (contributor two)
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor_two,
             campaign_id,
             amount_two
@@ -1731,7 +1732,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 70_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -1819,7 +1820,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 150_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -1884,7 +1885,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 150_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -1955,7 +1956,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 150_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -2007,7 +2008,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 150_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -2062,7 +2063,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 150_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
@@ -2123,7 +2124,7 @@ module crowdfund_addr::crowdfund_test {
         let amount      = 150_000_000;
         
         // call contribute
-        crowdfund::contribute(
+        crowdfund::contribute<AptosCoin>(
             contributor,
             campaign_id,
             amount
