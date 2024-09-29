@@ -1,6 +1,6 @@
-## Create Aptos Dapp Boilerplate Template
+## AptosCrowd
 
-The Boilerplate template provides a starter dapp with all necessary dapp infrastructure and a simple wallet info implementation.
+Introduce AptosCrowd
 
 
 The Boilerplate template provides:
