@@ -22,6 +22,8 @@ AptosCrowd is built upon the crowdfunding models outlined in Schwienbacher's (20
 
 By incorporating these foundational models, AptosCrowd offers project creators the flexibility to choose the approach that best aligns with their project's needs and goals.
 
+![Crowdfunding models](https://res.cloudinary.com/blockbard/image/upload/c_scale,w_auto,q_auto,f_auto,fl_lossy/v1728731951/crowdfunding-models-sc_ondvky.png)
+
  **Flexible (Keep-It-All - KIA) Model**:
   - **Description**: The project owner can claim funds at any time during the campaign, regardless of whether the funding goal is met.
 
@@ -70,6 +72,11 @@ Once a contribution is successfully made and the transaction is recorded on the 
 The frontend demo for AptosCrowd is maintained in a separate repository to ensure that the Move smart contracts remain focused and well-organized.
 
 It can be found here: [AptosCrowd Frontend Github](https://github.com)
+
+Screenshot of sample campaigns:
+
+![Sample Campaigns](https://res.cloudinary.com/blockbard/image/upload/c_scale,w_auto,q_auto,f_auto,fl_lossy/v1728731952/sample-campaigns-aptos-crowd_krt70a.png)
+
 
 ## Tech Overview and Considerations
 
