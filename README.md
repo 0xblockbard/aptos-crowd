@@ -63,11 +63,9 @@ The AptosCrowd demo is accessible at [https://aptoscrowd.com](https://aptoscrowd
 
 - **Real-Time Updates**: Successful pledges trigger automatic updates to the campaigns's funding progress.
 
-Our demo showcases how effortlessly blockchain technology can be integrated into crowdfunding platforms, emphasizing a seamless and user-friendly experience. 
+Our interactive demo provides a comprehensive preview of the AptosCrowd platform, highlighting our user-friendly interface and seamless integration of blockchain technology in crowdfunding.
 
-We prioritize the user journey in both funding and supporting campaigns, making the process straightforward and accessible. 
-
-The campaign interface is clean and minimalist, featuring a main campaign image on the left side and a data panel on the right that displays real-time campaign information fetched directly from smart contract storage. 
+We prioritize the user journey in both funding and supporting campaigns, making the process straightforward and accessible. For instance, the campaign interface is clean and minimalist, featuring a main campaign image on the left side and a data panel on the right that displays real-time campaign information fetched directly from smart contract storage. 
 
 Once a contribution is successfully made and the transaction is recorded on the blockchain, the campaign's progress updates automatically to reflect the new funding status.
 
