@@ -84,7 +84,7 @@ We follow the Aptos Object Model approach, storing Campaign Objects on user acco
 
 Each campaign creator has a CreatorCampaigns struct, containing a smart table mapping unique campaign IDs to Campaign structs. 
 
-The crowdfund contract maintains a global CampaignRegistry struct that maps campaign IDs to their respective creators. Campaign IDs are unique and sequentially assigned, ensuring that no two campaigns share the same ID, regardless of their creator.
+The crowdfund contract maintains a CampaignRegistry struct that maps campaign IDs to their respective creators. Campaign IDs are unique and sequentially assigned, ensuring that no two campaigns share the same ID, regardless of their creator.
 
 Currently, there are no fees for creating campaigns, though this may be introduced in the future if required. Instead, a small fee may be collected as a percentage of the crowdfunded amount whenever a creator claims funds from a campaign. Also, updates to the crowdfund fee will only impact campaigns created after the change. 
 
