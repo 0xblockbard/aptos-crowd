@@ -118,6 +118,7 @@ The crowdfunding smart contract includes five public entrypoints and one admin e
 **Admin Entrypoints**
 
 6. **update_config**: Allows the admin to update the crowdfund contract config (min_funding_goal, min_duration, min_contribution_amount, fee)
+
    - **Input**: Verifies that the signer is the admin and that a new fee cannot be greater than 5%
    - **Output**: Updates the crowdfund contract config 
 
