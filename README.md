@@ -1,18 +1,18 @@
 # AptosCrowd 
 
-AptosCrowd is a decentralized crowdfunding platform that implements both the Flexible (Keep-It-All) and Fixed (All-Or-Nothing) crowdfunding models, as popularized by Indiegogo.
+AptosCrowd is a decentralised crowdfunding platform that implements both the Flexible (Keep-It-All) and Fixed (All-Or-Nothing) crowdfunding models, as popularised by Indiegogo.
 
-The most significant benefits of a decentralized crowdfunding platform are greater transparency and fee efficiency. With no intermediaries involved, it becomes easier to ensure that funds are spent appropriately and to track them if necessary.
+The most significant benefits of a decentralised crowdfunding platform are greater transparency and fee efficiency. With no intermediaries involved, it becomes easier to ensure that funds are spent appropriately and to track them if necessary.
 
 Additionally, smart contracts eliminate traditional crowdfunding platform fees, such as the fundraiser fee (typically 5–8%) and the payment processor fee (around 2.9%).
 
-In the Aptos ecosystem, a decentralized crowdfunding platform will also serve to foster a shared community spirit together in support of new and exciting projects for the future across various categories.
+In the Aptos ecosystem, a decentralised crowdfunding platform will also serve to foster a shared community spirit together in support of new and exciting projects for the future across various categories.
 
 Through crowdfunding, project creators and developers can lower their risk and gauge the market or community's response to their project based on the amount of Aptos raised.
 
-In contrast, the conventional approach entails either investing too much time or effort into a high-risk venture only to find lackluster demand.
+In contrast, the conventional approach entails either investing too much time or effort into a high-risk venture only to find lacklustre demand.
 
-Over time and with a growing user base, we can adopt a decentralized governance model where members can shape the future direction of new initiatives and ventures.
+Over time and with a growing user base, we can adopt a decentralised governance model where members can shape the future direction of new initiatives and ventures.
 
 With AptosCrowd, we hope to increase the number of successful projects on the Aptos blockchain driven by a supportive and growing community.
 
@@ -27,7 +27,7 @@ By incorporating these foundational models, AptosCrowd offers project creators t
  **Flexible (Keep-It-All - KIA) Model**:
   - **Funding Terms**: The project owner can claim funds at any time during the campaign, regardless of whether the funding goal is met.
 
-  - **Supporter Terms**: Contributions are final, and there will be no refunds.
+  - **Supporter Terms**: Contributions are final with no refunds.
 
   - **Ideal For**: Small and scalable projects where any amount of funding can aid progress.
 
@@ -61,15 +61,15 @@ The AptosCrowd demo is accessible at [https://aptoscrowd.com](https://aptoscrowd
 
 - **Pledge Support**: Supporters can contribute and pledge Aptos tokens to campaigns directly through the platform.
 
-- **Real-Time Updates**: Successful pledges trigger automatic updates to the campaigns's funding progress.
+- **Real-Time Updates**: Successful pledges trigger automatic campaign funding progress updates.
 
 Our interactive demo provides a comprehensive preview of the AptosCrowd platform, highlighting our user-friendly interface and seamless integration of blockchain technology in crowdfunding.
 
-We prioritize the user journey in both funding and supporting campaigns, making the process straightforward and accessible. For instance, the campaign interface is clean and minimalist, featuring a main campaign image on the left side and a data panel on the right that displays real-time campaign information fetched directly from smart contract storage. 
+We prioritise the user journey in both funding and supporting campaigns, making the process straightforward and accessible. For instance, the campaign interface is clean and minimalist, featuring a main campaign image on the left side and a data panel on the right that displays real-time campaign information fetched directly from smart contract storage. 
 
 Once a contribution is successfully made and the transaction is recorded on the blockchain, the campaign's progress updates automatically to reflect the new funding status.
 
-The frontend demo for AptosCrowd is maintained in a separate repository to ensure that the Move smart contracts remain focused and well-organized.
+The frontend demo for AptosCrowd is maintained in a separate repository to ensure that the Move smart contracts remain focused and well-organised.
 
 It can be found here: [AptosCrowd Frontend Github](https://github.com)
 
@@ -80,9 +80,9 @@ Screenshot of sample campaigns:
 
 ## Tech Overview and Considerations
 
-We adopt the Aptos Object Model, storing campaigns on user accounts to enhance scalability and optimize gas costs.
+We follow the Aptos Object Model approach, storing Campaign Objects on user accounts rather than on the crowdfunding contract to decentralise data storage, enhance scalability, and optimise gas costs. 
 
-Each user has a CreatorCampaigns struct, which contains a smart table mapping from unique campaign IDs to Campaign structs. 
+Each campaign creator has a CreatorCampaigns struct, containing a smart table mapping unique campaign IDs to Campaign structs. 
 
 The crowdfund contract maintains a global CampaignRegistry struct that maps campaign IDs to their respective creators. Campaign IDs are unique and sequentially assigned, ensuring that no two campaigns share the same ID, regardless of their creator.
 
@@ -95,16 +95,16 @@ This overall fee structure aims to support the ongoing growth and development of
 The crowdfunding smart contract includes five public entrypoints and one admin entrypoint:
 
 **Public Entrypoints**
-1. **create_campaign**: Initializes a new crowdfunding campaign.
+1. **create_campaign**: Initialises a new crowdfunding campaign.
    - **Input**: Creator's wallet address, crowdfunding model type (KIA or AON), campaign end date, name, description, image URL, and target amount.
    - **Output**: Updates blockchain state with campaign details.
 
-2. **update_campaign**: Updates an existing crowdfunding campaign information.
+2. **update_campaign**: Updates an existing crowdfunding campaign
    - **Input**: Creator's wallet address, campaign id, name, description, image URL
    - **Output**: Updates blockchain state with new campaign information.
 
 3. **contribute**: Allows supporters to contribute and pledge Aptos to a campaign.
-   - **Input**: Supporter's pledged amount in Aptos. Verifies the campagin's ongoing status and adds or updates the supporter’s contribution in the funders’ map.
+   - **Input**: Supporter's pledged amount in Aptos. Verifies the campaign's ongoing status and adds or updates the supporter’s contribution in the funders’ map.
    - **Output**: Updates campaign's contributed amount.
 
 4. **claim_funds**: Enables the campaign creator to claim funds.
@@ -124,15 +124,17 @@ The crowdfunding smart contract includes five public entrypoints and one admin e
 
 ## Code Coverage
 
-AptosCrowd has a 100% test coverage as shown below:
+AptosCrowd has comprehensive test coverage, with 100% of the codebase thoroughly tested. This includes a full range of scenarios that ensure the platform's reliability and robustness. 
+
+The following section provides a breakdown of the tests that validate each function and feature, affirming that AptosCrowd performs as expected under all intended use cases.
 
 ![Code Coverage](https://res.cloudinary.com/blockbard/image/upload/c_scale,w_auto,q_auto,f_auto,fl_lossy/v1728727002/aptos-crowd-code-coverage-sc_z9elcc.png)
 
 ## Dummy Data Script
 
-We have also implemented a dummy data script to seed the Demo MVP with 9 sample campaigns.
+We have also included a dummy data script to populate the Demo MVP with 9 sample crowdfunding campaigns. This helps to demonstrate the AptosCrowd's features and provides a realistic view of how campaigns appear and function within the system
 
-To run the dummy data script after deploying a local version of our frontend and crowdfunding smart contract, follow these steps:
+To run the dummy data script after deploying a local instance of our frontend and crowdfunding smart contract, follow these steps:
 
 ```
 # compile the dummy data scipt and get the script path location
@@ -147,9 +149,9 @@ aptos move run-script --compiled-script-path /path_to_script.mv
 Looking ahead, here are some plans to expand the features and capabilities of AptosCrowd in Phase 2.
 
 ### Planned Features:
-- **DAO Governance**:  Implementing a Decentralized Autonomous Organization (DAO) to involve the community in decision-making processes, such as setting platform fees and initiating internally funded campaigns.
+- **DAO Governance**:  Implementing a Decentralised Autonomous Organization (DAO) to involve the community in decision-making processes, such as setting platform fees and initiating internally funded campaigns.
 
-- **Enhanced Campaign Creation**: Enable more detailed descriptions with text and multimedia (images and videos) for campaigns to better showcase their cause.
+- **Enhanced Campaign Creation**: Enable more detailed descriptions with text and multimedia (images and videos) for campaigns to showcase their cause better.
 
 - **User Profiles**: Introducing profiles where users can showcase the campaigns they've supported or created, along with features like comments and favourites to foster community engagement.
 
@@ -157,7 +159,7 @@ Looking ahead, here are some plans to expand the features and capabilities of Ap
 
 - **Pre- and Post-Crowdfunding Engagement**: Creating sections for campaign creators to gather feedback before launching and to provide updates after funding, building stronger relationships with supporters.
 
-- **Integration of NFTs**: NFTs as rewards for early supporters or as part of campaign offerings.
+- **Integration with NFTs**: NFTs as rewards for early supporters or as part of campaign offerings.
 
 ### Long-Term Vision:
 - **Community Growth**: Actively engage with the Aptos community to onboard new projects and supporters.
@@ -166,10 +168,10 @@ Looking ahead, here are some plans to expand the features and capabilities of Ap
 
 - **Educational Resources**: Provide guides and support for new users navigating decentralised crowdfunding.
 
-By pursuing these plans, AptosCrowd aims to become a leading platform in the decentralized crowdfunding space, driving innovation and supporting a wide range of projects on Aptos.
+By pursuing these plans, AptosCrowd aims to become a leading platform in the decentralised crowdfunding space, driving innovation and supporting a wide range of projects on Aptos.
 
 ## Conclusion
 
-AptosCrowd presents a clean, user-friendly, and well-organized crowdfunding platform on the Aptos Blockchain, bringing together creators, developers, and the broader community to build projects on Aptos.
+AptosCrowd presents a clean, user-friendly, and well-organised crowdfunding platform on the Aptos Blockchain, bringing together creators, developers, and the broader community to build projects on Aptos.
 
 With our flexible crowdfunding models, low fees, and full transparency, we seek to empower project creators and supporters to unite, fostering a collaborative community that drives the growth and development of the Aptos ecosystem.
