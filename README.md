@@ -67,6 +67,10 @@ The campaign interface is clean and minimalist, featuring a main campaign image 
 
 Once a contribution is successfully made and the transaction is recorded on the blockchain, the campaign's progress updates automatically to reflect the new funding status.
 
+The frontend demo for AptosCrowd is maintained in a separate repository to ensure that the Move smart contracts remain focused and well-organized.
+
+It can be found here: [AptosCrowd Frontend Github](https://github.com)
+
 ## Tech Overview and Considerations
 
 We adopt the Aptos Object Model, storing campaigns on user accounts to enhance scalability and optimize gas costs.
@@ -145,6 +149,6 @@ By pursuing these plans, AptosCrowd aims to become a leading platform in the dec
 
 ## Conclusion
 
-AptosCrowd represents a significant leap forward in crowdfunding by harnessing the Aptos blockchain’s capabilities. By offering flexible models, reduced fees, and enhanced transparency, it empowers both project creators and supporters.
+AptosCrowd presents a clean, user-friendly, and well-organized crowdfunding platform on the Aptos Blockchain, bringing together creators, developers, and the broader community to build projects on Aptos.
 
-With a strong technical foundation and an ambitious roadmap, AptosCrowd is poised to make a lasting impact on the Aptos ecosystem and the broader blockchain community.
+With our flexible crowdfunding models, low fees, and full transparency, we seek to empower project creators and supporters to unite, fostering a collaborative community that drives the growth and development of the Aptos ecosystem.
