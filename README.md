@@ -16,21 +16,11 @@ Over time and with a growing user base, we can adopt a decentralized governance 
 
 With AptosCrowd, we hope to increase the number of successful projects on the Aptos blockchain driven by a supportive and growing community.
 
-## Aptos Blockchain Utilization
-
-AptosCrowd leverages the advanced capabilities of the Aptos blockchain to enhance the decentralized crowdfunding experience:
-
-- **High Throughput and Low Latency**: Aptos's scalable infrastructure ensures fast transaction processing, crucial for a seamless crowdfunding platform.
-
-- **Move Programming Language**: Smart contracts are written in Move, Aptos's native language, providing safety and flexibility in executing complex crowdfunding logic.
-
-- **Security and Transparency**: Aptos's blockchain ensures all transactions are secure and transparent, fostering trust among users.
-
-- **Consensus Protocol**: Aptos's consensus mechanism enhances reliability and consistency, which is vital for handling numerous projects and transactions simultaneously.
-
 ## Crowdfunding Models on AptosCrowd
 
-AptosCrowd supports two primary crowdfunding models, offering flexibility to project creators:
+AptosCrowd is built upon the crowdfunding models outlined in Schwienbacher's (2000) research on Keep-It-All and All-Or-Nothing strategies.
+
+By incorporating these foundational models, AptosCrowd offers project creators the flexibility to choose the approach that best aligns with their project's needs and goals.
 
  **Flexible (Keep-It-All - KIA) Model**:
   - **Description**: The project owner can claim funds at any time during the campaign, regardless of whether the funding goal is met.
@@ -50,28 +40,32 @@ For both models, overfunding beyond the target amount is allowed, providing the 
 
 AptosCrowd empowers project owners to choose the crowdfunding model that best aligns with their project's needs and goals.
 
-_Reference: Schwienbacher, A. (2000). Crowdfunding Models: Keep-it-All vs. All-or-Nothing. SSRN Electronic Journal._
+Reference: [Schwienbacher, A. (2000). Crowdfunding Models: Keep-it-All vs. All-or-Nothing. SSRN Electronic Journal.](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2447567)
 
 ## Demo MVP
 
-The AptosCrowd demo is accessible at [https://aptoscrowd.com](https://aptoscrowd.com). The demo showcases sample crowdfunding projects using both the KIA and AON models.
+The AptosCrowd demo is accessible at [https://aptoscrowd.com](https://aptoscrowd.com) on the Aptos Testnet. The demo showcases sample crowdfunding campaigns using both the KIA and AON models.
 
 **Features**:
-- **Wallet Integration**: Users can connect their Aptos wallets to interact with the platform on testnet.
-- **Sample Projects**: Explore projects with detailed descriptions, images, funding goals, and deadlines.
-- **Pledge Support**: Supporters can contribute and pledge Aptos tokens to projects directly through the platform.
-- **Real-Time Updates**: Successful pledges trigger automatic updates to the project's funding progress.
+- **Wallet Integration**: Users can connect their Aptos wallets to interact with the platform on the Aptos Testnet.
 
-The demo emphasizes ease of use and highlights how blockchain technology can seamlessly integrate into crowdfunding.
+- **Sample Campaigns**: Explore sample campaigns with detailed descriptions, images, funding goals, and deadlines.
 
-## User Experience
+- **Create Campaigns**: Users are also free to experiment and create campaigns on their own
 
-The demo focuses on user experience in funding and supporting campaigns. 
+- **Edit Campaigns**: Users can also edit campaigns they have created on the Aptos Testnet (name, description, image)
 
-The campaign layout is simple and minimalistic, featuring a main campaign image on the left and a container displaying campaign data (pulled from smart contract storage) on the right.
+- **Pledge Support**: Supporters can contribute and pledge Aptos tokens to campaigns directly through the platform.
 
-Once an amount has been successfully pledged with the transaction recorded on the blockchain, the crowdfunding campaign will be automatically updated with the new progress.
+- **Real-Time Updates**: Successful pledges trigger automatic updates to the campaigns's funding progress.
 
+Our demo showcases how effortlessly blockchain technology can be integrated into crowdfunding platforms, emphasizing a seamless and user-friendly experience. 
+
+We prioritize the user journey in both funding and supporting campaigns, making the process straightforward and accessible. 
+
+The campaign interface is clean and minimalist, featuring a main campaign image on the left side and a data panel on the right that displays real-time campaign information fetched directly from smart contract storage. 
+
+Once a contribution is successfully made and the transaction is recorded on the blockchain, the campaign's progress updates automatically to reflect the new funding status.
 
 ## Smart Contract Entrypoints
 
@@ -85,7 +79,7 @@ The crowdfunding smart contract includes five entrypoints:
    - **Input**: Creator's wallet address, campaign id, name, description, image URL
    - **Output**: Updates blockchain state with new campaign information.
 
-3. **contribute**: Allows supporters to contribute and pledge Aptos to a project.
+3. **contribute**: Allows supporters to contribute and pledge Aptos to a campaign.
    - **Input**: Supporter's pledged amount in Aptos. Verifies the campagin's ongoing status and adds or updates the supporter’s contribution in the funders’ map.
    - **Output**: Updates campaign's contributed amount.
 
@@ -101,7 +95,8 @@ The crowdfunding smart contract includes five entrypoints:
 
 AptosCrowd has a 100% test coverage as shown below:
 
-_TODO: Insert test coverage diagram or metrics_
+![Code Coverage](https://res.cloudinary.com/blockbard/image/upload/c_scale,w_auto,q_auto,f_auto,fl_lossy/v1728727002/aptos-crowd-code-coverage-sc_z9elcc.png)
+
 
 ## Future Plans
 
