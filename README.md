@@ -135,10 +135,10 @@ We have also implemented a dummy data script to seed the Demo MVP with 9 sample 
 To run the dummy data script after deploying a local version of our frontend and crowdfunding smart contract, follow these steps:
 
 ```
-// compile the dummy data scipt and get the script path location
+# compile the dummy data scipt and get the script path location
 aptos move compile-script
 
-// copy the script path location and paste it at the end
+# copy the script path location and paste it at the end (replace path_to_script.mv)
 aptos move run-script --compiled-script-path /path_to_script.mv
 ```
 
