@@ -67,10 +67,23 @@ The campaign interface is clean and minimalist, featuring a main campaign image 
 
 Once a contribution is successfully made and the transaction is recorded on the blockchain, the campaign's progress updates automatically to reflect the new funding status.
 
+## Tech Overview and Considerations
+
+We adopt the Aptos Object Model, storing campaigns on user accounts to enhance scalability and optimize gas costs.
+
+Each user has a CreatorCampaigns struct, which contains a smart table mapping from unique campaign IDs to Campaign structs. 
+
+The crowdfund contract maintains a global CampaignRegistry struct that maps campaign IDs to their respective creators. Campaign IDs are unique and sequentially assigned, ensuring that no two campaigns share the same ID, regardless of their creator.
+
+Currently, there are no fees for creating campaigns, though this may be introduced in the future if required. Instead, a small fee may be collected as a percentage of the crowdfunded amount whenever a creator claims funds from a campaign. 
+
+Also, updates to the crowdfund fee will only impact campaigns created after the change. This overall fee structure aims to support the ongoing growth and development of the AptosCrowd project, promoting long-term sustainability.
+
 ## Smart Contract Entrypoints
 
-The crowdfunding smart contract includes five entrypoints:
+The crowdfunding smart contract includes five public entrypoints and one admin entrypoint:
 
+**Public Entrypoints**
 1. **create_campaign**: Initializes a new crowdfunding campaign.
    - **Input**: Creator's wallet address, crowdfunding model type (KIA or AON), campaign end date, name, description, image URL, and target amount.
    - **Output**: Updates blockchain state with campaign details.
@@ -90,6 +103,12 @@ The crowdfunding smart contract includes five entrypoints:
 5. **refund**: Allows supporters to get a refund for failed AON campaigns.
    - **Input**: Verifies that the sender is a supporter and that the campaign is AON type and has ended.
    - **Output**: Sends the refund amount to the supporter's wallet.
+
+**Admin Entrypoints**
+
+6. **update_config**: Allows the admin to update the crowdfund contract config (min_funding_goal, min_duration, min_contribution_amount, fee)
+   - **Input**: Verifies that the signer is the admin and that a new fee cannot be greater than 5%
+   - **Output**: Updates the crowdfund contract config 
 
 ## Code Coverage
 
