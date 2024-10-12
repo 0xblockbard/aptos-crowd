@@ -65,11 +65,11 @@ The AptosCrowd demo is accessible at [https://aptoscrowd.com](https://aptoscrowd
 
 Our interactive demo provides a comprehensive preview of the AptosCrowd platform, highlighting our user-friendly interface and seamless integration of blockchain technology in crowdfunding.
 
-We prioritise the user journey in both funding and supporting campaigns, making the process straightforward and accessible. For instance, the campaign interface is clean and minimalist, featuring a main campaign image on the left side and a data panel on the right that displays real-time campaign information fetched directly from smart contract storage. 
+We prioritise the user journey in both funding and supporting campaigns, making the process straightforward and accessible. For instance, the campaign interface is clean and minimalist, featuring a main campaign image on the left side and a data panel on the right that displays real-time campaign information fetched directly from the blockchain storage. 
 
 Once a contribution is successfully made and the transaction is recorded on the blockchain, the campaign's progress updates automatically to reflect the new funding status.
 
-The frontend demo for AptosCrowd is maintained in a separate repository to ensure that the Move smart contracts remain focused and well-organised.
+The frontend demo for AptosCrowd is maintained in a separate repository to ensure that the Move contracts remain focused and well-organised.
 
 It can be found here: [AptosCrowd Frontend Github](https://github.com)
 
@@ -92,7 +92,7 @@ This overall fee structure aims to support the ongoing growth and development of
 
 ## Smart Contract Entrypoints
 
-The crowdfunding smart contract includes five public entrypoints and one admin entrypoint:
+The AptosCrowd crowdfunding module includes five public entrypoints and one admin entrypoint:
 
 **Public Entrypoints**
 1. **create_campaign**: Initialises a new crowdfunding campaign.
@@ -134,7 +134,7 @@ The following section provides a breakdown of the tests that validate each funct
 
 We have also included a dummy data script to populate the Demo MVP with 9 sample crowdfunding campaigns. This helps to demonstrate the AptosCrowd's features and provides a realistic view of how campaigns appear and function within the system
 
-To run the dummy data script after deploying a local instance of our frontend and crowdfunding smart contract, follow these steps:
+To run the dummy data script after deploying a local instance of our frontend and AptosCrowd Package, follow these steps:
 
 ```
 # compile the dummy data scipt and get the script path location
