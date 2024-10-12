@@ -86,9 +86,9 @@ Each user has a CreatorCampaigns struct, which contains a smart table mapping fr
 
 The crowdfund contract maintains a global CampaignRegistry struct that maps campaign IDs to their respective creators. Campaign IDs are unique and sequentially assigned, ensuring that no two campaigns share the same ID, regardless of their creator.
 
-Currently, there are no fees for creating campaigns, though this may be introduced in the future if required. Instead, a small fee may be collected as a percentage of the crowdfunded amount whenever a creator claims funds from a campaign. 
+Currently, there are no fees for creating campaigns, though this may be introduced in the future if required. Instead, a small fee may be collected as a percentage of the crowdfunded amount whenever a creator claims funds from a campaign. Also, updates to the crowdfund fee will only impact campaigns created after the change. 
 
-Also, updates to the crowdfund fee will only impact campaigns created after the change. This overall fee structure aims to support the ongoing growth and development of the AptosCrowd project, promoting long-term sustainability.
+This overall fee structure aims to support the ongoing growth and development of the AptosCrowd project, promoting long-term sustainability.
 
 ## Smart Contract Entrypoints
 
