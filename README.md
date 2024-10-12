@@ -16,27 +16,29 @@ Over time and with a growing user base, we can adopt a decentralized governance 
 
 With AptosCrowd, we hope to increase the number of successful projects on the Aptos blockchain driven by a supportive and growing community.
 
+![AptosCrowd](https://res.cloudinary.com/blockbard/image/upload/c_scale,w_auto,q_auto,f_auto,fl_lossy/v1728732366/aptos-home-sc_gx1y5v.png)
+
 ## Crowdfunding Models on AptosCrowd
 
 AptosCrowd is built upon the crowdfunding models outlined in Schwienbacher's (2000) research on Keep-It-All and All-Or-Nothing strategies.
 
 By incorporating these foundational models, AptosCrowd offers project creators the flexibility to choose the approach that best aligns with their project's needs and goals.
 
-![Crowdfunding models](https://res.cloudinary.com/blockbard/image/upload/c_scale,w_auto,q_auto,f_auto,fl_lossy/v1728731951/crowdfunding-models-sc_ondvky.png)
-
  **Flexible (Keep-It-All - KIA) Model**:
-  - **Description**: The project owner can claim funds at any time during the campaign, regardless of whether the funding goal is met.
+  - **Funding Terms**: The project owner can claim funds at any time during the campaign, regardless of whether the funding goal is met.
 
   - **Supporter Terms**: Contributions are final, and there will be no refunds.
 
   - **Ideal For**: Small and scalable projects where any amount of funding can aid progress.
 
  **Fixed (All-Or-Nothing - AON) Model**:
-  - **Description**: The project owner can only claim the funds if the target goal is reached by the campaign's end date.
+  - **Funding Terms**: The project owner can only claim the funds if the target goal is reached by the campaign's end date.
 
   - **Supporter Terms**: Supporters can claim a refund if the project fails to meet its funding goal by the end date.
 
   - **Ideal For**: Large and non-scalable projects that require a minimum amount of funding to proceed.
+
+![Crowdfunding models](https://res.cloudinary.com/blockbard/image/upload/c_scale,w_auto,q_auto,f_auto,fl_lossy/v1728731951/crowdfunding-models-sc_ondvky.png)
 
 For both models, overfunding beyond the target amount is allowed, providing the potential for additional project enhancements. Campaigns should be set between 3 and 45 days, ensuring timely funding cycles.
 
