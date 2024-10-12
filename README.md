@@ -128,6 +128,19 @@ AptosCrowd has a 100% test coverage as shown below:
 
 ![Code Coverage](https://res.cloudinary.com/blockbard/image/upload/c_scale,w_auto,q_auto,f_auto,fl_lossy/v1728727002/aptos-crowd-code-coverage-sc_z9elcc.png)
 
+## Dummy Data Script
+
+We have also implemented a dummy data script to seed the Demo MVP with 9 sample campaigns.
+
+To run the dummy data script after deploying a local version of our frontend and crowdfunding smart contract, follow these steps:
+
+```
+// compile the dummy data scipt and get the script path location
+aptos move compile-script
+
+// copy the script path location and paste it at the end
+aptos move run-script --compiled-script-path /path_to_script.mv
+```
 
 ## Future Plans
 
