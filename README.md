@@ -132,12 +132,12 @@ The following section provides a breakdown of the tests that validate each funct
 
 ## Dummy Data Script
 
-We have also included a dummy data script to populate the Demo MVP with 9 sample crowdfunding campaigns. This helps to demonstrate the AptosCrowd's features and provides a realistic view of how campaigns appear and function within the system
+We have also included a dummy data script to populate the AptosCrowd Demo MVP with 9 sample crowdfunding campaigns. This helps to demonstrate our features and provides a realistic view of how campaigns appear and function on the site.
 
 To run the dummy data script after deploying a local instance of our frontend and AptosCrowd Package, follow these steps:
 
 ```
-# compile the dummy data scipt and get the script path location
+# compile the dummy data script and get the script path location
 aptos move compile-script
 
 # copy the script path location and paste it at the end (replace path_to_script.mv)
