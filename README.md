@@ -175,3 +175,15 @@ By pursuing these plans, AptosCrowd aims to become a leading platform in the dec
 AptosCrowd presents a clean, user-friendly, and well-organised crowdfunding platform on the Aptos Blockchain, bringing together creators, developers, and the broader community to build projects on Aptos.
 
 With our flexible crowdfunding models, low fees, and full transparency, we seek to empower project creators and supporters to unite, fostering a collaborative community that drives the growth and development of the Aptos ecosystem.
+
+## Credits and Support
+
+Thanks for reading till the end!
+
+AptosCrowd is designed and built by 0xBlockBard, a solo indie maker passionate about building innovative products in the web3 space. With over 10 years of experience, my work spans full-stack and smart contract development, with the Laravel Framework as my go-to for web projects. I’m also familiar with Solidity, Rust, LIGO, and most recently, Aptos Move.
+
+Beyond coding, I occasionally write and share insights on crypto market trends and interesting projects to watch. If you are interested to follow along my web3 journey, you can subscribe to my [Substack](https://www.0xblockbard.com/) here :)
+
+Twitter / X: [0xBlockBard](https://x.com/0xblockbard)
+
+Substack: [0xBlockBard Research](https://www.0xblockbard.com/)
