@@ -180,7 +180,9 @@ With our flexible crowdfunding models, low fees, and full transparency, we seek 
 
 Thanks for reading till the end!
 
-AptosCrowd is designed and built by 0xBlockBard, a solo indie maker passionate about building innovative products in the web3 space. With over 10 years of experience, my work spans full-stack and smart contract development, with the Laravel Framework as my go-to for web projects. I’m also familiar with Solidity, Rust, LIGO, and most recently, Aptos Move.
+AptosCrowd is designed and built by 0xBlockBard, a solo indie maker passionate about building innovative products in the web3 space. 
+
+With over 10 years of experience, my work spans full-stack and smart contract development, with the Laravel Framework as my go-to for web projects. I’m also familiar with Solidity, Rust, LIGO, and most recently, Aptos Move.
 
 Beyond coding, I occasionally write and share insights on crypto market trends and interesting projects to watch. If you are interested to follow along my web3 journey, you can subscribe to my [Substack](https://www.0xblockbard.com/) here :)
 
