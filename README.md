@@ -55,17 +55,17 @@ The AptosCrowd demo is accessible at [https://aptoscrowd.com](https://aptoscrowd
 
 - **Sample Campaigns**: Explore sample campaigns with detailed descriptions, images, funding goals, and deadlines.
 
-- **Create Campaigns**: Users are also free to experiment and create campaigns on their own
+- **Create Campaigns**: Users are free to experiment and create campaigns of their own on the Aptos Testnet
 
-- **Edit Campaigns**: Users can also edit campaigns they have created on the Aptos Testnet (name, description, image)
+- **Edit Campaigns**: Users can also edit campaigns they have created (only name, description, image)
 
 - **Pledge Support**: Supporters can contribute and pledge Aptos tokens to campaigns directly through the platform.
 
 - **Real-Time Updates**: Successful pledges trigger automatic campaign funding progress updates.
 
-Our interactive demo provides a comprehensive preview of the AptosCrowd platform, highlighting our user-friendly interface and seamless integration of blockchain technology in crowdfunding.
+Our interactive demo provides a comprehensive preview of the AptosCrowd platform. Users can explore sample campaigns with detailed descriptions, images, funding goals, and deadlines to get a feel for how the live site will operate.
 
-We prioritise the user journey in both funding and supporting campaigns, making the process straightforward and accessible. For instance, the campaign interface is clean and minimalist, featuring a main campaign image on the left side and a data panel on the right that displays real-time campaign information fetched directly from the blockchain storage. 
+We also prioritise the user journey in both funding and supporting campaigns, making the process straightforward and accessible. For instance, we keep the campaign interface clean and minimalistic, featuring a main campaign image on the left side and a data panel on the right that displays real-time campaign information fetched directly from the blockchain storage. 
 
 Once a contribution is successfully made and the transaction is recorded on the blockchain, the campaign's progress updates automatically to reflect the new funding status.
 
