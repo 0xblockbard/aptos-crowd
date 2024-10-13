@@ -1,8 +1,9 @@
 script {
+    
+    use crowdfund_addr::crowdfund;
+    
     use std::string;
     use std::vector;
-    // use aptos_framework::signer;
-    use crowdfund_addr::crowdfund;
 
     fun setup_dummy_data(creator: &signer) {
         let name_bytes_list = vector[
