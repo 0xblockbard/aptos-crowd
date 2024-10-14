@@ -1,6 +1,8 @@
 # AptosCrowd 
 
-AptosCrowd is a decentralised crowdfunding platform that implements both the Flexible (Keep-It-All) and Fixed (All-Or-Nothing) crowdfunding models, as popularised by Indiegogo.
+***A decentralised opensource crowdfunding platform for the Aptos community***
+
+Designed for creators, developers, and indie makers alike, AptosCrowd is a decentralised crowdfunding platform that implements both the Flexible (Keep-It-All) and Fixed (All-Or-Nothing) crowdfunding models, as popularised by Indiegogo.
 
 The most significant benefits of a decentralised crowdfunding platform are greater transparency and fee efficiency. With no intermediaries involved, it becomes easier to ensure that funds are spent appropriately and to track them if necessary.
 
