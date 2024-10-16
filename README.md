@@ -73,7 +73,7 @@ Once a contribution is successfully made and the transaction is recorded on the 
 
 The frontend demo for AptosCrowd is maintained in a separate repository to ensure that the Move contracts remain focused and well-organised.
 
-It can be found here: [AptosCrowd Frontend Github](https://github.com)
+It can be found here: [AptosCrowd Frontend Github](https://github.com/0xblockbard/aptos-crowd-frontend)
 
 Screenshot of sample campaigns:
 
